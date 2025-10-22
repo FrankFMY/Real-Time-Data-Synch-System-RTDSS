@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)
 ![Svelte](https://img.shields.io/badge/Svelte-5.41-orange?logo=svelte)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue?logo=postgresql)
-![Redis](https://img.shields.io/badge/Redis-7-red?logo=redis)
+![Redis](https://img.shields.io/badge/Redis-8.2.2-red?logo=redis)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 **Полнофункциональная система синхронизации данных в реальном времени для многопользовательских приложений**
@@ -362,7 +362,7 @@ await tx.execute(sql`SELECT flush_batch_notifications()`);
 - **SvelteKit** — SSR + API routing
 - **Hono** — быстрый web framework для API
 - **PostgreSQL 18** — основная БД с RLS и триггерами
-- **Redis 7** — pub/sub для подписок
+- **Redis 8.2.2** — pub/sub для подписок
 - **Drizzle ORM** — type-safe database queries
 
 ### Frontend
@@ -444,7 +444,7 @@ SESSION_SECRET=your-secret-key-change-in-production
 Сервисы запускаются автоматически:
 
 - **PostgreSQL 18** на порту `5433`
-- **Redis 7** на порту `6379`
+- **Redis 8.2.2** на порту `6379`
 
 ---
 
