@@ -1,0 +1,10 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"types": ["vitest/globals", "node"],
+		"lib": ["ES2023", "DOM"],
+		"skipLibCheck": true
+	},
+	"include": ["./**/*.ts", "../src/**/*.ts"],
+	"exclude": ["node_modules"]
+}

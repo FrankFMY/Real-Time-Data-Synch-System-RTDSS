@@ -36,13 +36,13 @@ app.post('/', async (c) => {
 		const client = await pool.connect();
 
 		try {
-			// Устанавливаем контекст
+			await client.query('BEGIN');
+
+			// Устанавливаем контекст (ПОСЛЕ BEGIN!)
 			await setUserContext(client, userId);
 			if (clientId) {
 				await setClientIdContext(client, clientId);
 			}
-
-			await client.query('BEGIN');
 
 			// Создаем заказ
 			const result = await client.query(
@@ -104,13 +104,13 @@ app.post('/:id/accept', async (c) => {
 		const client = await pool.connect();
 
 		try {
-			// Устанавливаем контекст
+			await client.query('BEGIN');
+
+			// Устанавливаем контекст (ПОСЛЕ BEGIN!)
 			await setUserContext(client, userId);
 			if (clientId) {
 				await setClientIdContext(client, clientId);
 			}
-
-			await client.query('BEGIN');
 
 			// Проверяем что заказ pending
 			const orderCheck = await client.query(
@@ -207,13 +207,13 @@ app.patch('/:id/status', async (c) => {
 		const client = await pool.connect();
 
 		try {
-			// Устанавливаем контекст
+			await client.query('BEGIN');
+
+			// Устанавливаем контекст (ПОСЛЕ BEGIN!)
 			await setUserContext(client, userId);
 			if (clientId) {
 				await setClientIdContext(client, clientId);
 			}
-
-			await client.query('BEGIN');
 
 			// Обновляем статус
 			const result = await client.query(
@@ -293,13 +293,13 @@ app.post('/:id/cancel', async (c) => {
 		const client = await pool.connect();
 
 		try {
-			// Устанавливаем контекст
+			await client.query('BEGIN');
+
+			// Устанавливаем контекст (ПОСЛЕ BEGIN!)
 			await setUserContext(client, userId);
 			if (clientId) {
 				await setClientIdContext(client, clientId);
 			}
-
-			await client.query('BEGIN');
 
 			// Отменяем заказ
 			const result = await client.query(

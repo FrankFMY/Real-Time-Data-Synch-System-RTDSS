@@ -37,5 +37,12 @@ export default defineConfig(
 				svelteConfig
 			}
 		}
+	},
+	{
+		// Послабления для тестов (моки требуют any)
+		files: ['tests/**/*.ts'],
+		rules: {
+			'@typescript-eslint/no-explicit-any': 'off'
+		}
 	}
 );

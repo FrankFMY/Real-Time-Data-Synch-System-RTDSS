@@ -135,14 +135,14 @@ CREATE OR REPLACE FUNCTION resolve_affected_users(
 ) RETURNS UUID[] AS $$
 DECLARE
 	result UUID[] := ARRAY[]::UUID[];
-	collection_id TEXT;
+	coll_id TEXT;
 	schema_row RECORD;
 BEGIN
-	FOREACH collection_id IN ARRAY collections
+	FOREACH coll_id IN ARRAY collections
 	LOOP
 		SELECT access_rules INTO schema_row
 		FROM collection_schema
-		WHERE collection_schema.collection_id = collection_id;
+		WHERE collection_schema.collection_id = coll_id;
 
 		IF FOUND THEN
 			-- Применяем access_rules для определения пользователей
