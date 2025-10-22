@@ -10,6 +10,7 @@ pnpm-lock.yaml
 
 # Database
 drizzle/0*.sql
+drizzle/meta/
 *.db
 
 # Logs

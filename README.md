@@ -265,7 +265,7 @@ const orders = await syncManager.subscribeCollection('orders_active');
 
 // ✅ Параметризованная коллекция
 const messages = await syncManager.subscribeCollection('chat_messages:\*', {
-param: 'chat123'
+	param: 'chat123'
 });
 ```
 
@@ -458,25 +458,25 @@ SESSION_SECRET=your-secret-key-change-in-production
 // src/lib/collections.schema.ts
 
 export const COLLECTIONS = {
-// ... существующие коллекции
+	// ... существующие коллекции
 
-products_active: {
-collection_id: 'products_active',
-base_table: 'product',
-filter: {
-status: 'active'
-},
-fields: {
-product: ['id', 'name', 'price', 'version']
-},
-cache_strategy: {
-ttl: 60000,
-persist_offline: true
-},
-access_control: {
-type: 'collection_level'
-}
-}
+	products_active: {
+		collection_id: 'products_active',
+		base_table: 'product',
+		filter: {
+			status: 'active'
+		},
+		fields: {
+			product: ['id', 'name', 'price', 'version']
+		},
+		cache_strategy: {
+			ttl: 60000,
+			persist_offline: true
+		},
+		access_control: {
+			type: 'collection_level'
+		}
+	}
 };
 ```
 
@@ -504,41 +504,40 @@ pnpm db:load-collections
 // src/lib/server/api/products.ts
 
 app.post('/products', async (c) => {
-const userId = c.get('userId');
-const clientId = c.get('clientId');
-const body = await c.req.json();
+	const userId = c.get('userId');
+	const clientId = c.get('clientId');
+	const body = await c.req.json();
 
-const client = await pool.connect();
+	const client = await pool.connect();
 
-try {
-await client.query('BEGIN');
-await setUserContext(client, userId);
-if (clientId) await setClientIdContext(client, clientId);
+	try {
+		await client.query('BEGIN');
+		await setUserContext(client, userId);
+		if (clientId) await setClientIdContext(client, clientId);
 
-    // 1. Создаем продукт
-    const result = await client.query(
-      `INSERT INTO product (name, price, user_id)
+		// 1. Создаем продукт
+		const result = await client.query(
+			`INSERT INTO product (name, price, user_id)
        VALUES ($1, $2, $3) RETURNING *`,
-      [body.name, body.price, userId]
-    );
+			[body.name, body.price, userId]
+		);
 
-    // 2. ВАЖНО: Флашим батч для отправки обновлений
-    await client.query('SELECT flush_batch_notifications()');
+		// 2. ВАЖНО: Флашим батч для отправки обновлений
+		await client.query('SELECT flush_batch_notifications()');
 
-    await client.query('COMMIT');
+		await client.query('COMMIT');
 
-    return c.json({
-      success: true,
-      data: result.rows[0],
-      meta: { excluded_from_sse: true }
-    });
-
-} catch (err) {
-await client.query('ROLLBACK');
-throw err;
-} finally {
-client.release();
-}
+		return c.json({
+			success: true,
+			data: result.rows[0],
+			meta: { excluded_from_sse: true }
+		});
+	} catch (err) {
+		await client.query('ROLLBACK');
+		throw err;
+	} finally {
+		client.release();
+	}
 });
 ```
 

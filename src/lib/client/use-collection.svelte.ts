@@ -5,51 +5,43 @@
  */
 
 import { syncStore } from './sync-store.svelte';
-import { onDestroy } from 'svelte';
 
 export function useCollection(collectionId: string, params?: Record<string, unknown>) {
 	let data = $state<Record<string, unknown>[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
-	let subscribed = false;
 
-	// Подписка
+	// Подписка с cleanup через $effect (Svelte 5 best practice)
 	$effect(() => {
-		if (!subscribed) {
-			subscribed = true;
+		let subscribed = false;
 
-			syncStore
-				.subscribe(collectionId, params)
-				.then((initialData) => {
-					data = initialData;
-					loading = false;
-				})
-				.catch((err) => {
-					error = err.message;
-					loading = false;
-				});
-		}
+		syncStore
+			.subscribe(collectionId, params)
+			.then((initialData) => {
+				data = initialData;
+				loading = false;
+				subscribed = true;
+			})
+			.catch((err) => {
+				error = err.message;
+				loading = false;
+			});
+
+		// Cleanup при unmount
+		return () => {
+			if (subscribed) {
+				syncStore.unsubscribe(collectionId);
+			}
+		};
 	});
 
-	// Отписка при unmount
-	onDestroy(() => {
-		if (subscribed) {
-			syncStore.unsubscribe(collectionId);
-		}
-	});
-
-	// Reactive getter
-	const getData = () => {
-		const currentData = syncStore.getCollection(collectionId);
-		if (currentData.length > 0) {
-			data = currentData;
-		}
-		return data;
-	};
+	// Используем $derived для реактивности вместо getter
+	const currentData = $derived(syncStore.getCollection(collectionId));
+	const finalData = $derived(currentData.length > 0 ? currentData : data);
 
 	return {
 		get data() {
-			return getData();
+			return finalData;
 		},
 		get loading() {
 			return loading;
