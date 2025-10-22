@@ -1,0 +1,16 @@
+# Build outputs
+.svelte-kit
+build
+dist
+.output
+
+# Dependencies
+node_modules
+
+# Generated
+**/.svelte-kit/**
+**/build/**
+
+# Database migrations
+drizzle/0*.sql
+

@@ -1,0 +1,20 @@
+# Build outputs
+.svelte-kit
+build
+dist
+.output
+
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Database
+drizzle/0*.sql
+*.db
+
+# Logs
+*.log
+
+# Temp
+tmp
+temp
