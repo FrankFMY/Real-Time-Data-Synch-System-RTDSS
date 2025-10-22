@@ -45,7 +45,7 @@
 
 ### Общая схема системы
 
-\`\`\`mermaid
+```mermaid
 graph TB
 subgraph "CLIENT"
 UI[Svelte UI Components]
@@ -108,11 +108,11 @@ IDB[IndexedDB Cold Storage]
     style REDIS fill:#ffeaa7
     style BATCH fill:#74b9ff
 
-\`\`\`
+```
 
 ### Поток данных при изменении
 
-\`\`\`mermaid
+```mermaid
 sequenceDiagram
 participant ClientA as Client A
 participant API as Hono API
@@ -157,11 +157,11 @@ participant ClientC as Client C
     Note over ClientA: Получил данные через HTTP<br/>(НЕ через SSE)
     Note over ClientB,ClientC: Получили данные через SSE<br/>(real-time)
 
-\`\`\`
+```
 
 ### Двухуровневый кэш на клиенте
 
-\`\`\`mermaid
+```mermaid
 graph LR
 Query[Query Data] --> RuntimeCheck{In Runtime<br/>Map?}
 RuntimeCheck -->|Hit| Return[Return Data<br/>~1ms]
@@ -179,7 +179,7 @@ IDBCheck -->|Miss| FetchAPI[Fetch from Server<br/>~50-100ms]
     style IDBCheck fill:#45b7d1
     style Return fill:#96ceb4
 
-\`\`\`
+```
 
 ---
 
@@ -193,7 +193,7 @@ IDBCheck -->|Miss| FetchAPI[Fetch from Server<br/>~50-100ms]
 
 ### Установка и запуск
 
-\`\`\`bash
+```bash
 
 # 1. Клонировать репозиторий
 
@@ -226,31 +226,30 @@ pnpm dev
 
 # http://localhost:5173/demo
 
-\`\`\`
+```
 
 ### Использование в компонентах
 
-\`\`\`svelte
-
+```svelte
 <script lang="ts">
-  import { useCollection } from '$lib/client/use-collection.svelte';
+	import { useCollection } from '$lib/client/use-collection.svelte';
 
-  // Подписка на коллекцию с автоматическими real-time обновлениями
-  const { data: orders, loading, error } = useCollection('orders_active');
+	// Подписка на коллекцию с автоматическими real-time обновлениями
+	const { data: orders, loading, error } = useCollection('orders_active');
 </script>
 
 <div>
-  <h1>Активные заказы</h1>
-  
-  {#if loading}
-    <p>Загрузка...</p>
-  {:else}
-    {#each orders as order}
-      <div>{order.status} - {order.total}₽</div>
-    {/each}
-  {/if}
+	<h1>Активные заказы</h1>
+
+	{#if loading}
+		<p>Загрузка...</p>
+	{:else}
+		{#each orders as order}
+			<div>{order.status} - {order.total}₽</div>
+		{/each}
+	{/if}
 </div>
-\`\`\`
+```
 
 ---
 
@@ -260,7 +259,7 @@ pnpm dev
 
 Вместо подписки на отдельные записи, клиенты подписываются на **коллекции данных**:
 
-\`\`\`typescript
+```typescript
 // ✅ Подписка на коллекцию
 const orders = await syncManager.subscribeCollection('orders_active');
 
@@ -268,35 +267,35 @@ const orders = await syncManager.subscribeCollection('orders_active');
 const messages = await syncManager.subscribeCollection('chat_messages:\*', {
 param: 'chat123'
 });
-\`\`\`
+```
 
 ### Differential Sync
 
 Клиент отправляет **state vector** с версиями известных entity:
 
-\`\`\`json
+```json
 {
-"order:abc-123": { "version": 5 },
-"user:xyz-789": { "version": 3 }
+	"order:abc-123": { "version": 5 },
+	"user:xyz-789": { "version": 3 }
 }
-\`\`\`
+```
 
 Сервер возвращает только **изменения**:
 
-\`\`\`json
+```json
 {
 "new": [...], // Новые entity
 "updated": [...], // Обновлённые (version > client)
 "unchanged": [...], // Без изменений
 "removed": [...] // Удалённые
 }
-\`\`\`
+```
 
 ### Atomic Batching
 
 Все изменения одной транзакции группируются в **один батч**:
 
-\`\`\`typescript
+```typescript
 await db.transaction(async (tx) => {
 // 1. Обновляем заказ
 await tx.update(orders).set({ status: 'accepted' });
@@ -308,9 +307,9 @@ await tx.insert(orderHistory).values({ action: 'accepted' });
 await tx.insert(notifications).values({ ... });
 
 // 4. ВАЖНО: Флашим батч
-await tx.execute(sql\`SELECT flush_batch_notifications()\`);
+await tx.execute(sql`SELECT flush_batch_notifications()`);
 });
-\`\`\`
+```
 
 Клиенты получают все 3 изменения **одним SSE сообщением**.
 
@@ -384,7 +383,7 @@ await tx.execute(sql\`SELECT flush_batch_notifications()\`);
 
 ## 📁 Структура проекта
 
-\`\`\`
+```
 Real-Time-Data-Synch-System-RTDSS/
 ├── drizzle/ # Database migrations
 │ └── sql/ # SQL триггеры и RLS политики
@@ -410,7 +409,7 @@ Real-Time-Data-Synch-System-RTDSS/
 ├── compose.yaml # Docker Compose
 ├── .env.example # Пример конфигурации
 └── README.md # Этот файл
-\`\`\`
+```
 
 ---
 
@@ -420,7 +419,7 @@ Real-Time-Data-Synch-System-RTDSS/
 
 Скопируйте `.env.example` в `.env` и настройте:
 
-\`\`\`env
+```env
 
 # Database
 
@@ -438,7 +437,7 @@ PUBLIC_APP_URL=http://localhost:5173
 # Session
 
 SESSION_SECRET=your-secret-key-change-in-production
-\`\`\`
+```
 
 ### Docker Compose
 
@@ -455,7 +454,7 @@ SESSION_SECRET=your-secret-key-change-in-production
 
 **1. Определите в schema:**
 
-\`\`\`typescript
+```typescript
 // src/lib/collections.schema.ts
 
 export const COLLECTIONS = {
@@ -479,31 +478,29 @@ type: 'collection_level'
 }
 }
 };
-\`\`\`
+```
 
 **2. Загрузите в БД:**
 
-\`\`\`bash
+```bash
 pnpm db:load-collections
-\`\`\`
+```
 
 **3. Используйте в компоненте:**
 
-\`\`\`svelte
-
+```svelte
 <script lang="ts">
-  const { data: products } = useCollection('products_active');
+	const { data: products } = useCollection('products_active');
 </script>
 
 {#each products as product}
-
-  <div>{product.name} - {product.price}₽</div>
+	<div>{product.name} - {product.price}₽</div>
 {/each}
-\`\`\`
+```
 
 ### Business Logic с батчингом
 
-\`\`\`typescript
+```typescript
 // src/lib/server/api/products.ts
 
 app.post('/products', async (c) => {
@@ -520,8 +517,8 @@ if (clientId) await setClientIdContext(client, clientId);
 
     // 1. Создаем продукт
     const result = await client.query(
-      \`INSERT INTO product (name, price, user_id)
-       VALUES ($1, $2, $3) RETURNING *\`,
+      `INSERT INTO product (name, price, user_id)
+       VALUES ($1, $2, $3) RETURNING *`,
       [body.name, body.price, userId]
     );
 
@@ -543,7 +540,7 @@ throw err;
 client.release();
 }
 });
-\`\`\`
+```
 
 ---
 
@@ -551,27 +548,27 @@ client.release();
 
 ### Unit тесты
 
-\`\`\`bash
+```bash
 pnpm test:unit
-\`\`\`
+```
 
 ### E2E тесты
 
-\`\`\`bash
+```bash
 pnpm test
-\`\`\`
+```
 
 ### Проверка типов
 
-\`\`\`bash
+```bash
 pnpm check
-\`\`\`
+```
 
 ### Linting
 
-\`\`\`bash
+```bash
 pnpm lint
-\`\`\`
+```
 
 ---
 
@@ -634,22 +631,22 @@ pnpm lint
 
 PostgreSQL RLS обеспечивает персонализированный доступ:
 
-\`\`\`sql
+```sql
 -- Пример политики: видишь только свои заказы
 CREATE POLICY order_as_customer ON "order"
 FOR SELECT
 USING (customer_id = current_app_user_id());
-\`\`\`
+```
 
 #### Триггеры для батчинга
 
 Автоматическое отслеживание изменений:
 
-\`\`\`sql
+```sql
 CREATE TRIGGER order_update_trigger
 BEFORE UPDATE ON "order"
 FOR EACH ROW EXECUTE FUNCTION buffer_entity_notification();
-\`\`\`
+```
 
 ---
 
